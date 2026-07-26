@@ -69,8 +69,18 @@ def add_position_embeddings(tokens, position_embeddings):
     # TODO: combine tokens (B, S, D) with position_embeddings (1, S, D) via broadcasting.
     return tokens + position_embeddings # (B, S, D)
 
-# Step 7 - compute_attention_scores (not yet solved)
-# TODO: implement
+# Step 7 - compute_attention_scores
+import torch
+
+def compute_attention_scores(q, k):
+    """Compute raw attention scores Q @ K^T.
+
+    q: (..., Sq, d_head)
+    k: (..., Sk, d_head)
+    returns: (..., Sq, Sk)
+    """
+    # TODO: compute the raw attention scores as Q times K-transpose
+    return torch.matmul(q, k.transpose(-2, -1))
 
 # Step 8 - scale_attention_scores (not yet solved)
 # TODO: implement
