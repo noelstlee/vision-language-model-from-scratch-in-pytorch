@@ -91,8 +91,10 @@ def scale_attention_scores(scores, d_head):
     # TODO: Divide raw attention scores by a constant derived from d_head.
     return scores / torch.sqrt(torch.tensor(d_head))
 
-# Step 9 - apply_attention_mask (not yet solved)
-# TODO: implement
+# Step 9 - apply_attention_mask
+def apply_attention_mask(scores, mask):
+    # TODO: add an additive mask (0 = allowed, -inf = blocked) to attention scores.
+    return scores + mask if mask is not None else scores
 
 # Step 10 - attention_softmax (not yet solved)
 # TODO: implement
