@@ -112,8 +112,23 @@ def attention_context(attn_weights, v):
     # TODO: return a tensor of shape (..., Sq, d_head) from attn_weights and v
     return torch.matmul(attn_weights, v)
 
-# Step 12 - scaled_dot_product_attention (not yet solved)
-# TODO: implement
+# Step 12 - scaled_dot_product_attention
+import torch
+
+def scaled_dot_product_attention(q, k, v, mask=None):
+    """Compose score, scale, mask, softmax, and context into full attention."""
+    # TODO: compose the five attention primitives into a single forward pass.
+    # (q*k^t) / sqrt(d_k):
+    d_head = q.shape[-1]
+    pre_norm_scores = scale_attention_scores(compute_attention_scores(q,k), d_head)
+    # apply masking
+    masked_scores = apply_attention_mask(pre_norm_scores, mask)
+    # apply softmax
+    attn_weights = attention_softmax(masked_scores)
+    # apply values to produce context vectors
+    output = attention_context(attn_weights, v)
+
+    return output
 
 # Step 13 - split_into_heads (not yet solved)
 # TODO: implement
