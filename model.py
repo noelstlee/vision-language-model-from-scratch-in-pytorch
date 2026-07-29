@@ -336,7 +336,13 @@ def vision_encoder_block(x, block_params, num_heads):
 import torch
 
 def vision_encoder(patch_sequence, encoder_params, num_heads):
-    """Stack ViT encoder blocks then apply a final layer norm to the patch sequence."""
+    """
+    Stack ViT encoder blocks then apply a final layer norm to the patch sequence.
+    Inputs: 
+        - patch_sequence: teh input tensor that enters the encoder (B, S, d_model)
+    We feed this patch_sequence through the encoder_blocks in order each block receiving the output of the previous one, so the var (patch_sequence) is updated every step.
+    After the loop finishes we apply one more final 'layer_norm'
+    """
     # TODO: run patch_sequence through every block in encoder_params['blocks'], then final layer norm.
     for block in encoder_params["blocks"]:
         patch_sequence = vision_encoder_block(patch_sequence, block, num_heads)
