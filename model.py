@@ -233,8 +233,21 @@ def gelu_activation(x):
     # TODO: implement GELU(x) = x * 0.5 * (1 + erf(x / sqrt(2)))
     return x * 0.5 * (1 + torch.erf(x / math.sqrt(2)))
 
-# Step 21 - mlp_first_layer (not yet solved)
-# TODO: implement
+# Step 21 - mlp_first_layer
+import torch
+
+def mlp_first_layer(x, w1, b1):
+    """
+    Apply the first linear layer of the MLP block followed by GELU.
+    Inputs:
+        - x: input sequence (B, S, d_model); B: Batch, S: Sequence (number of tokens), d_model: Embedding Space
+        - w1, b1: MLP weight, bias; (d_ff, d_model), (d_ff,); d_ff: wider feed-forward dimension
+    """
+    # TODO: project x to the feed-forward dimension and apply GELU
+    # apply linear projection first:
+    expand_embed = linear_projection(x, w1, b1)
+    # apply gelu:
+    return gelu_activation(expand_embed)
 
 # Step 22 - mlp_second_layer (not yet solved)
 # TODO: implement
