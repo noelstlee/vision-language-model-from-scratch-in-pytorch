@@ -170,8 +170,23 @@ def project_qkv(x, wq, bq, wk, bk, wv, bv):
     v = linear_projection(x, wv, bv)
     return (q, k, v)
 
-# Step 16 - split_qkv_into_heads (not yet solved)
-# TODO: implement
+# Step 16 - split_qkv_into_heads
+import torch
+
+def split_qkv_into_heads(q, k, v, num_heads):
+    """
+    Inputs:
+        - q,k,v: (B, S, d_model)
+        - num_heads: int
+    Return:
+        multi-head form of each tensor as a tuple
+        (q_h, k_h, v_h) where each output has a shape (B, num_heads, S, d_head)
+    """
+    B, S, d_model = q.shape
+    q_h = split_into_heads(q, num_heads)
+    k_h = split_into_heads(k, num_heads)
+    v_h = split_into_heads(v, num_heads)
+    return (q_h, k_h, v_h)
 
 # Step 17 - multi_head_attention_scores (not yet solved)
 # TODO: implement
