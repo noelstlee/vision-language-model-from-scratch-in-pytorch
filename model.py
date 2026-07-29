@@ -225,8 +225,13 @@ def multi_head_self_attention(x, params, num_heads, mask=None):
     context_heads = multi_head_attention_scores(multi_head_qkv[0], multi_head_qkv[1], multi_head_qkv[2], mask) # shape: (B, num_heads, S, d_head)
     return merge_and_output_project(context_heads, params["wo"], params["bo"])
 
-# Step 20 - gelu_activation (not yet solved)
-# TODO: implement
+# Step 20 - gelu_activation
+import torch
+
+def gelu_activation(x):
+    """Apply the exact (erf-based) GELU activation elementwise to x."""
+    # TODO: implement GELU(x) = x * 0.5 * (1 + erf(x / sqrt(2)))
+    return x * 0.5 * (1 + torch.erf(x / math.sqrt(2)))
 
 # Step 21 - mlp_first_layer (not yet solved)
 # TODO: implement
