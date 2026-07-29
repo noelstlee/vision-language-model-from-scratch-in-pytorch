@@ -249,8 +249,16 @@ def mlp_first_layer(x, w1, b1):
     # apply gelu:
     return gelu_activation(expand_embed)
 
-# Step 22 - mlp_second_layer (not yet solved)
-# TODO: implement
+# Step 22 - mlp_second_layer
+import torch
+
+def mlp_second_layer(h, w2, b2):
+    """
+    Inputs:
+        - h: (B, S, d_ff); post-acitvation hidden tensor
+    """
+    # TODO: project the MLP hidden activations back down to d_model using w2 and b2
+    return linear_projection(h, w2, b2)
 
 # Step 23 - mlp_block (not yet solved)
 # TODO: implement
