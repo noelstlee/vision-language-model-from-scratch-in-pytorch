@@ -214,8 +214,16 @@ def merge_and_output_project(context_heads, wo, bo):
     # linear projection; this is what lets differnt heads communicate; without it each head would write into a fixed slice of the residual stream
     return linear_projection(model_dim, wo, bo)
 
-# Step 19 - multi_head_self_attention (not yet solved)
-# TODO: implement
+# Step 19 - multi_head_self_attention
+import torch
+
+def multi_head_self_attention(x, params, num_heads, mask=None):
+    """Run full multi-head self-attention: QKV proj, head split, attention, merge, output proj."""
+    # TODO: compose project_qkv, split_qkv_into_heads, multi_head_attention_scores, merge_and_output_project.
+    qkv_tuple = project_qkv(x, params["wq"], params["bq"], params["wk"], params["bk"], params["wv"], params["bv"]) # (q,k,v)
+    multi_head_qkv = split_qkv_into_heads(qkv_tuple[0], qkv_tuple[1], qkv_tuple[2], num_heads) # (q_h, k_h, v_h)
+    context_heads = multi_head_attention_scores(multi_head_qkv[0], multi_head_qkv[1], multi_head_qkv[2], mask) # shape: (B, num_heads, S, d_head)
+    return merge_and_output_project(context_heads, params["wo"], params["bo"])
 
 # Step 20 - gelu_activation (not yet solved)
 # TODO: implement
