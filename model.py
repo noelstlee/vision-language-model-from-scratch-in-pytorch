@@ -285,8 +285,15 @@ def compute_layernorm_stats(x, eps=1e-5):
     var = torch.var(x, dim=-1, keepdims=True, unbiased=False) # (B, S, 1)
     return (mean, var)
 
-# Step 25 - layer_norm (not yet solved)
-# TODO: implement
+# Step 25 - layer_norm
+import torch
+
+def layer_norm(x, gamma, beta, eps=1e-5):
+    # TODO: normalize the last dim of x and apply learnable scale gamma and shift beta
+    mean, var = compute_layernorm_stats(x, eps)
+    layer_norm = (x - mean) / torch.sqrt(var + eps)
+    y = layer_norm * gamma + beta
+    return y
 
 # Step 26 - residual_add (not yet solved)
 # TODO: implement
