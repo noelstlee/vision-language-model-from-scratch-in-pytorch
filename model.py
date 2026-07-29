@@ -143,8 +143,17 @@ def split_into_heads(x, num_heads):
     x = x.transpose(-2, -3) # (B, nums_head, S, d_head)
     return x
 
-# Step 14 - merge_heads (not yet solved)
-# TODO: implement
+# Step 14 - merge_heads
+import torch
+
+def merge_heads(x):
+    """Merge (B, num_heads, S, d_head) back to (B, S, num_heads*d_head)."""
+    # TODO: merge the multi-head dimension back into the model dimension
+    B, num_heads, S, d_head = x.shape
+    # transpose num_heads axis and S (sequence):
+    x = x.transpose(-2, -3) # (B, S, num_heads, d_head)
+    x = x.reshape(B, S, num_heads * d_head)
+    return x
 
 # Step 15 - project_qkv (not yet solved)
 # TODO: implement
