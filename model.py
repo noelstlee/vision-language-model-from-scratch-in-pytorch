@@ -155,8 +155,20 @@ def merge_heads(x):
     x = x.reshape(B, S, num_heads * d_head)
     return x
 
-# Step 15 - project_qkv (not yet solved)
-# TODO: implement
+# Step 15 - project_qkv
+def project_qkv(x, wq, bq, wk, bk, wv, bv):
+    """
+    produce the query, key, and value tensors from input sequence 'x'
+    Inputs:
+        - x: (B, S, d_model) -> S: Sequence (number of tokens), d_model: Embedding Space
+        - wq, wk, wv: weights of query, key, value (d_model, d_model)
+        - bq, bk, bv: bias of query, key, value  (d_model,)
+    """
+    # TODO: project x into separate query, key, and value tensors using three linear layers.
+    q = linear_projection(x, wq, bq)
+    k = linear_projection(x, wk, bk)
+    v = linear_projection(x, wv, bv)
+    return (q, k, v)
 
 # Step 16 - split_qkv_into_heads (not yet solved)
 # TODO: implement
