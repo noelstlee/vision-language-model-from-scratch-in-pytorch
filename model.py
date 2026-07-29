@@ -209,8 +209,9 @@ def merge_and_output_project(context_heads, wo, bo):
     Merge heads back to d_model and apply the output projection."""
     # TODO: merge multi-head context to (B, S, d_model) then apply linear projection with wo, bo
     # merge multi head context (B, S, d_model)
+    # (B, H, S, d_head) -> (B, S, H * d_head) = (B, S, d_model)
     model_dim = merge_heads(context_heads)
-    # linear projection
+    # linear projection; this is what lets differnt heads communicate; without it each head would write into a fixed slice of the residual stream
     return linear_projection(model_dim, wo, bo)
 
 # Step 19 - multi_head_self_attention (not yet solved)
