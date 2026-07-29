@@ -272,8 +272,18 @@ def mlp_block(x, params):
     compressed_emebeddings = mlp_second_layer(expanded_embeddings, params["w2"], params["b2"])
     return compressed_emebeddings
 
-# Step 24 - compute_layernorm_stats (not yet solved)
-# TODO: implement
+# Step 24 - compute_layernorm_stats
+import torch
+
+def compute_layernorm_stats(x, eps=1e-5):
+    """
+    Inputs:
+    - x (B, S, d_model)
+    """
+    # TODO: return (mean, var) along the last dim, each with shape (..., 1).
+    mean = torch.mean(x, dim=-1, keepdims=True) # (B, S, 1)
+    var = torch.var(x, dim=-1, keepdims=True, unbiased=False) # (B, S, 1)
+    return (mean, var)
 
 # Step 25 - layer_norm (not yet solved)
 # TODO: implement
