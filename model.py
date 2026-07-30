@@ -385,8 +385,36 @@ def vision_language_projector(patch_features, params):
     gelu_result = projector_first_layer(patch_features, params["w1"], params["b1"])
     return projector_second_layer(gelu_result, params["w2"], params["b2"])
 
-# Step 34 - build_token_vocabulary (not yet solved)
-# TODO: implement
+# Step 34 - build_token_vocabulary
+def build_token_vocabulary(texts, image_token='<image>', pad_token='<pad>'):
+    # 1. Initialize the dictionary with special tokens
+    vocab = {
+        pad_token: 0,
+        image_token: 1
+    }
+    
+    # 2. Extract all distinct tokens from the input texts
+    unique_tokens = set()
+    for text in texts:
+        # text.split() splits the string by whitespace
+        for token in text.split():
+            unique_tokens.add(token)
+            
+    # Remove special tokens from our set if they were in the text
+    # so we don't accidentally assign them new IDs later
+    unique_tokens.discard(pad_token)
+    unique_tokens.discard(image_token)
+    
+    # 3. Sort the tokens to make the assignment deterministic
+    sorted_tokens = sorted(list(unique_tokens))
+    
+    # 4. Assign sequential IDs starting from 2
+    current_id = 2
+    for token in sorted_tokens:
+        vocab[token] = current_id
+        current_id += 1
+        
+    return vocab
 
 # Step 35 - encode_text_to_ids (not yet solved)
 # TODO: implement
