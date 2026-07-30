@@ -454,8 +454,19 @@ def add_text_position_embeddings(text_embeddings, position_embeddings):
     T = text_embeddings.shape[0]
     return text_embeddings + position_embeddings[:T,:] # (T, D_lang) + (T, D_lang) = (T, D_lang)
 
-# Step 38 - find_image_placeholder_positions (not yet solved)
-# TODO: implement
+# Step 38 - find_image_placeholder_positions
+import torch
+
+def find_image_placeholder_positions(token_ids, image_token_id):
+    """Return a list of indices where token_ids == image_token_id."""
+    # TODO: scan token_ids and return every position whose value equals image_token_id
+    index = 0
+    out = []
+    for token in token_ids:
+        if token == image_token_id:
+            out.append(index)
+        index += 1
+    return out
 
 # Step 39 - insert_image_tokens (not yet solved)
 # TODO: implement
