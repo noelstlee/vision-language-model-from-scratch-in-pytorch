@@ -468,8 +468,24 @@ def find_image_placeholder_positions(token_ids, image_token_id):
         index += 1
     return out
 
-# Step 39 - insert_image_tokens (not yet solved)
-# TODO: implement
+# Step 39 - insert_image_tokens
+import torch
+
+def insert_image_tokens(text_embeddings, image_tokens, placeholder_position):
+    """Splice image tokens into the text embedding sequence at the placeholder slot.
+    Inputs:
+        - text_embeddings: (T,D)
+        - image_tokens: (N,D)
+        - placeholder_position: int
+    Returns:
+        - (T - 1 + N, D)
+    """
+    # TODO: replace text_embeddings[placeholder_position] with the N image_tokens rows
+    # slice text_embeddings before the placeholder_position
+    frontier = text_embeddings[:placeholder_position, :] # (placeholder_position - 1, D)
+    posterier = text_embeddings[placeholder_position + 1:,:] # (T - placeholder_position, D)
+    frontier_w_image = torch.cat((frontier, image_tokens), dim=0) # (N + placeholder_position - 1, D)
+    return torch.cat((frontier_w_image, posterier), dim=0) # (N + T - 1, D)
 
 # Step 40 - build_multimodal_embeddings (not yet solved)
 # TODO: implement
