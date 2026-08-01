@@ -547,8 +547,15 @@ def build_label_tensor(token_ids, image_token_id, pad_token_id, num_image_tokens
         i += 1
     return label
 
-# Step 42 - build_causal_mask (not yet solved)
-# TODO: implement
+# Step 42 - build_causal_mask
+import torch
+
+def build_causal_mask(seq_len):
+    """Return a (seq_len, seq_len) additive causal mask: 0 on/under diag, -inf above."""
+    # TODO: build a lower-triangular additive mask with 0 allowed and -inf blocked
+    mask = torch.full((seq_len, seq_len), float("-inf"))
+    mask = torch.triu(mask, diagonal=1)
+    return mask
 
 # Step 43 - decoder_block (not yet solved)
 # TODO: implement
