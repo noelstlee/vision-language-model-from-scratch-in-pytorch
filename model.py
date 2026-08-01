@@ -509,8 +509,43 @@ def build_multimodal_embeddings(token_ids, image_tokens, embedding_matrix, posit
         out = insert_image_tokens(text_embeddings_with_position, image_tokens, placeholder)
     return out
 
-# Step 41 - build_label_tensor (not yet solved)
-# TODO: implement
+# Step 41 - build_label_tensor
+import torch
+
+def build_label_tensor(token_ids, image_token_id, pad_token_id, num_image_tokens, ignore_index=-100):
+    """
+    Build the label tensor aligned to the fused multimodal sequence.
+    Inputs:
+        - token_ids: (T,) -> has p placeholder positions; each placeholder expanding into N image embeddings
+        - image_token_id: int
+        - pad_token_id: int
+        - num_image_token: N
+    Returns:
+        - label tensor: fused length L = T + P(N - 1)
+    """
+    # TODO: expand image placeholders, mask image and pad positions with ignore_index
+    # find the list of indicies where token_ids == image_token_id
+    placeholder_positions = find_image_placeholder_positions(token_ids, image_token_id)
+    # expand each image placeholder in 'token_ids' into 'num_image_tokens' positions
+    iteration = 0
+    offset = 1
+    label = token_ids # initialize label
+    for placeholder in placeholder_positions:
+        placeholder += offset - 1
+        image_embeddings = torch.full((num_image_tokens,), ignore_index)
+        frontier = label[:placeholder]
+        posterier = label[placeholder + 1:]
+        label = torch.cat((frontier, image_embeddings))
+        label = torch.cat((label, posterier)) # L = T + (N - 1) (* P times depending on length of placeholder_positons)
+        iteration += 1
+        offset = iteration * num_image_tokens
+    # replace every occurence of pad_token_ids to ignore_index
+    i = 0
+    for token in label:
+        if token == pad_token_id:
+            label[i] = ignore_index
+        i += 1
+    return label
 
 # Step 42 - build_causal_mask (not yet solved)
 # TODO: implement
