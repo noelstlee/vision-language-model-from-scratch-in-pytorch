@@ -582,8 +582,14 @@ def decoder_block(x, params, causal_mask):
 
     return out.squeeze(0) if is_2d else out
 
-# Step 44 - language_model_decoder (not yet solved)
-# TODO: implement
+# Step 44 - language_model_decoder
+import torch
+
+def language_model_decoder(x, blocks_params, causal_mask):
+    # TODO: apply every decoder block in blocks_params sequentially to x and return the result
+    for block in blocks_params:
+        x = decoder_block(x, block, causal_mask)
+    return x
 
 # Step 45 - final_layer_norm (not yet solved)
 # TODO: implement
