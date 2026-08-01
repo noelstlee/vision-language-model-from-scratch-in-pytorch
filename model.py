@@ -487,8 +487,27 @@ def insert_image_tokens(text_embeddings, image_tokens, placeholder_position):
     frontier_w_image = torch.cat((frontier, image_tokens), dim=0) # (N + placeholder_position - 1, D)
     return torch.cat((frontier_w_image, posterier), dim=0) # (N + T - 1, D)
 
-# Step 40 - build_multimodal_embeddings (not yet solved)
-# TODO: implement
+# Step 40 - build_multimodal_embeddings
+import torch
+
+def build_multimodal_embeddings(token_ids, image_tokens, embedding_matrix, position_embeddings, image_token_id):
+    """
+    Inputs:
+        - token_ids: (T,)
+        - image_tokens: tensor of projected image tokens (N, D_lang)
+        - embedding_matrix: (V (Vocab), D_lang)
+        - position_embedding_matrix
+        - image_token_id: int
+    Returns
+        - (T - 1 + N,)
+    """
+    # TODO: build fused multimodal embeddings by embedding text, adding positions, and splicing image tokens.
+    text_embeddings = embed_token_ids(token_ids, embedding_matrix) # (T, D_lang)
+    text_embeddings_with_position = add_text_position_embeddings(text_embeddings, position_embeddings) # (T, D_Lang)
+    placeoholder_position = find_image_placeholder_positions(token_ids, image_token_id) # list of indicies where token_ids == image_token_id
+    for placeholder in placeoholder_position:
+        out = insert_image_tokens(text_embeddings_with_position, image_tokens, placeholder)
+    return out
 
 # Step 41 - build_label_tensor (not yet solved)
 # TODO: implement
