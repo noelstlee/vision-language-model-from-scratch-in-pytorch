@@ -557,8 +557,30 @@ def build_causal_mask(seq_len):
     mask = torch.triu(mask, diagonal=1)
     return mask
 
-# Step 43 - decoder_block (not yet solved)
-# TODO: implement
+# Step 43 - decoder_block
+def decoder_block(x, params, causal_mask):
+    """
+    Inputs:
+        - x : (L, D)
+        - params: dict
+        - casual_mask: forbids attending future tokens (main difference between encoder)
+    """
+    # TODO: run a pre-norm masked self-attention sublayer then a pre-norm MLP sublayer over x.
+    is_2d = x.ndim == 2
+    if is_2d:
+        x_in = x.unsqueeze(0)
+    else:
+        x_in = x
+
+    attn_lambda = lambda norm_x: multi_head_self_attention(
+        norm_x, params["attn"], params["num_heads"], mask
+    )
+    MHSA = pre_norm_sublayer(x_in, params["ln1"]["gamma"], params["ln1"]["beta"], attn_lambda)
+    
+    mlp_lambda = lambda norm_x: mlp_block(norm_x, params["mlp"])
+    out = pre_norm_sublayer(MHSA, params["ln2"]["gamma"], params["ln2"]["beta"], mlp_lambda)
+
+    return out.squeeze(0) if is_2d else out
 
 # Step 44 - language_model_decoder (not yet solved)
 # TODO: implement
