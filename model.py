@@ -591,8 +591,12 @@ def language_model_decoder(x, blocks_params, causal_mask):
         x = decoder_block(x, block, causal_mask)
     return x
 
-# Step 45 - final_layer_norm (not yet solved)
-# TODO: implement
+# Step 45 - final_layer_norm
+import torch
+
+def final_layer_norm(x, gamma, beta):
+    # TODO: apply the existing layer_norm primitive to x using gamma and beta.
+    return layer_norm(x, gamma, beta, eps=1e-5)
 
 # Step 46 - language_model_head (not yet solved)
 # TODO: implement
