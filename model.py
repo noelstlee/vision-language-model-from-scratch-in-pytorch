@@ -531,7 +531,7 @@ def build_label_tensor(token_ids, image_token_id, pad_token_id, num_image_tokens
     offset = 1
     label = token_ids # initialize label
     for placeholder in placeholder_positions:
-        placeholder += offset - 1
+        placeholder += offset - 1 # since label is keep on updating the placeholder position in labels tensor varies by an offset.
         image_embeddings = torch.full((num_image_tokens,), ignore_index)
         frontier = label[:placeholder]
         posterier = label[placeholder + 1:]
