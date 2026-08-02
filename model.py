@@ -630,8 +630,31 @@ def encode_image_to_tokens(image, vision_params, projector_params):
     out = vision_language_projector(only_patch, projector_params)
     return out.squeeze(0)
 
-# Step 48 - vision_language_forward (not yet solved)
-# TODO: implement
+# Step 48 - vision_language_forward
+def vision_language_forward(image, token_ids, params):
+    """
+    Inputs:
+        - image:
+        - token_ids: 1D tensor containing one image placeholder
+        - params: keys: 'vision', 'projector', 'embedding', 'pos_embedding', 'decoder_blocks', 'final_ln' (with 'gamma','beta'), 'lm_head' (with 'w_out','b_out'), and 'image_token_id'.
+    Returns:
+        (L, V); vocab logits tensor
+
+    """
+    # TODO: route image + token_ids through the full vision-language model and return (L, V) logits.
+    image_tokens = encode_image_to_tokens(image, params['vision'], params['projector'])
+
+    # Multi Modal embeddings (text, image)
+    embeddings = build_multimodal_embeddings(token_ids, image_tokens, params['embedding'], params['pos_embedding'], params['image_token_id']) # (T -1 + N_img,)
+    # mask
+    mask = build_causal_mask(embeddings.shape[0]) # seqence length is T -1 + N_img
+    # pass into the decoder
+    x = language_model_decoder(embeddings, params['decoder_blocks'], mask)
+    # final norm layer
+    x = final_layer_norm(x, params['final_ln']['gamma'], params['final_ln']['beta'])
+    # language model head -> mapping each position to vocabularly logits
+    logit_scores = language_model_head(x, params['lm_head']['w_out'], params['lm_head']['b_out']) # (L, V)
+    return logit_scores
 
 # Step 49 - shift_logits_and_labels (not yet solved)
 # TODO: implement
