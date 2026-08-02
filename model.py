@@ -669,8 +669,36 @@ def shift_logits_and_labels(logits, labels):
     L, V = logits.shape
     return (logits[:L - 1, :], labels[1:])
 
-# Step 50 - per_position_cross_entropy (not yet solved)
-# TODO: implement
+# Step 50 - per_position_cross_entropy
+import torch
+
+def per_position_cross_entropy(shifted_logits, shifted_labels, ignore_index=-100):
+    """
+    Per-position next-token cross-entropy with 0 at ignored positions.
+    Inputs:
+        - shifted_logits: (L - 1, V)
+        - shifited_labels: (L - 1,)
+    Returns
+        (L - 1,) holds negative log prob of correct token at each position; value of 0.0 whever the label equals 'ignore_index'
+    """
+    # 1. Compute log-softmax over vocabulary dimension
+    log_probs = torch.log_softmax(shifted_logits, dim=-1)  # (L - 1, V)
+
+    # 2. Replace ignore_index with a safe index (e.g., 0) to prevent out-of-bounds error during gather
+    safe_labels = torch.where(shifted_labels == ignore_index, 0, shifted_labels)
+    # torch.where -> condition, value chosen when condition is true, value chosen when condition is false
+
+    # 3. Gather log probabilities for the target tokens (unsqueeze/squeeze for proper 2D indexing)
+    selected_log_probs = torch.gather(log_probs, dim=1, index=safe_labels.unsqueeze(-1)).squeeze(-1)
+
+    # 4. Convert log probabilities to loss (negative log-likelihood)
+    loss = -selected_log_probs
+
+    # 5. Zero out loss at ignored positions
+    mask = (shifted_labels != ignore_index)
+    loss = torch.where(mask, loss, 0.0)
+
+    return loss
 
 # Step 51 - masked_mean_loss (not yet solved)
 # TODO: implement
