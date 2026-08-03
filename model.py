@@ -700,8 +700,23 @@ def per_position_cross_entropy(shifted_logits, shifted_labels, ignore_index=-100
 
     return loss
 
-# Step 51 - masked_mean_loss (not yet solved)
-# TODO: implement
+# Step 51 - masked_mean_loss
+import torch
+
+def masked_mean_loss(per_position_losses, shifted_labels, ignore_index=-100):
+    """Average per-position losses over positions whose label != ignore_index.
+    Input:
+        - per_position_losses: 1-D tensor of length L-1 (shifted sequence length)
+        - shifted_labels: 1-D tensor of length L - 1
+    """
+    # TODO: average per_position_losses over positions where shifted_labels != ignore_index
+    mask = torch.zeros((shifted_labels.shape))
+    denominator = 0
+    for i in range(len(shifted_labels)):
+        if shifted_labels[i] != ignore_index:
+            mask[i] = 1
+            denominator += 1
+    return torch.sum(per_position_losses * mask) / denominator if denominator != 0 else torch.tensor(0)
 
 # Step 52 - greedy_next_token (not yet solved)
 # TODO: implement
