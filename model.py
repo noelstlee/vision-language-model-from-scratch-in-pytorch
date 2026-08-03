@@ -731,8 +731,19 @@ def apply_temperature(logits, temperature):
     # TODO: return a tensor of logits rescaled by the temperature value
     return logits / temperature
 
-# Step 54 - top_k_filter (not yet solved)
-# TODO: implement
+# Step 54 - top_k_filter
+import torch
+
+def top_k_filter(logits, k):
+    """Keep only the top-k logits; set all others to -inf."""
+    # TODO: keep top-k logits, replace the rest with -inf
+    if k == 0 or k >= logits.shape[0]:
+        return logits
+    else:
+        masked_logits = torch.full_like(logits, float('-inf'))
+        values, indices = torch.topk(logits, k)
+        masked_logits.scatter_(dim=-1, index=indices, src=values)
+        return masked_logits
 
 # Step 55 - sample_from_logits (not yet solved)
 # TODO: implement
