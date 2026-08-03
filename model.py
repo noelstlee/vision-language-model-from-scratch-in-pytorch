@@ -573,7 +573,7 @@ def decoder_block(x, params, causal_mask):
         x_in = x
 
     attn_lambda = lambda norm_x: multi_head_self_attention(
-        norm_x, params["attn"], params["num_heads"], mask
+        norm_x, params["attn"], params["num_heads"], causal_mask
     )
     MHSA = pre_norm_sublayer(x_in, params["ln1"]["gamma"], params["ln1"]["beta"], attn_lambda)
     
