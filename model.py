@@ -723,8 +723,13 @@ def greedy_next_token(logits):
     # TODO: return the int token id with the highest logit at the final position
     return torch.argmax(logits[logits.shape[0] - 1,:], dim=0).item()
 
-# Step 53 - apply_temperature (not yet solved)
-# TODO: implement
+# Step 53 - apply_temperature
+import torch
+
+def apply_temperature(logits, temperature):
+    """Scale logits by dividing by temperature."""
+    # TODO: return a tensor of logits rescaled by the temperature value
+    return logits / temperature
 
 # Step 54 - top_k_filter (not yet solved)
 # TODO: implement
