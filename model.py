@@ -718,8 +718,10 @@ def masked_mean_loss(per_position_losses, shifted_labels, ignore_index=-100):
             denominator += 1
     return torch.sum(per_position_losses * mask) / denominator if denominator != 0 else torch.tensor(0)
 
-# Step 52 - greedy_next_token (not yet solved)
-# TODO: implement
+# Step 52 - greedy_next_token
+def greedy_next_token(logits):
+    # TODO: return the int token id with the highest logit at the final position
+    return torch.argmax(logits[logits.shape[0] - 1,:], dim=0).item()
 
 # Step 53 - apply_temperature (not yet solved)
 # TODO: implement
