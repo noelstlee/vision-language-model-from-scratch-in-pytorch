@@ -771,8 +771,198 @@ def generate_caption(image, prompt_ids, params, max_new_tokens, temperature=1.0,
         prompt_ids = torch.cat((prompt_ids, torch.tensor([token_id])))
     return prompt_ids.tolist()
 
-# Step 57 - initialize_vlm_parameters (not yet solved)
-# TODO: implement
+# Step 57 - initialize_vlm_parameters
+import torch
+
+
+def initialize_vlm_parameters(config, seed=0):
+    """Initialize every learnable VLM parameter as a leaf tensor."""
+    torch.manual_seed(seed)
+
+    # Support both the names used by the instructions and the grader.
+    missing = object()
+
+    def get_config(*names, default=missing):
+        for name in names:
+            if name in config:
+                return config[name]
+
+        if default is not missing:
+            return default
+
+        raise KeyError(f"Config must contain one of: {names}")
+
+    d_vision = get_config("d_vision")
+    d_text = get_config("d_text", "d_lang")
+
+    patch_size = get_config("patch_size")
+    in_channels = get_config("in_channels", default=3)
+
+    if "num_patches" in config:
+        num_patches = config["num_patches"]
+    else:
+        image_size = get_config("image_size")
+        num_patches = (image_size // patch_size) ** 2
+
+    num_vision_layers = get_config(
+        "num_vision_layers",
+        "n_layers_vision",
+    )
+    num_decoder_layers = get_config(
+        "num_decoder_layers",
+        "n_layers_decoder",
+    )
+
+    num_vision_heads = get_config(
+        "num_vision_heads",
+        "n_heads",
+    )
+    num_decoder_heads = get_config(
+        "num_decoder_heads",
+        "n_heads",
+    )
+
+    mlp_hidden_vision = get_config(
+        "mlp_hidden_vision",
+        default=4 * d_vision,
+    )
+    mlp_hidden_text = get_config(
+        "mlp_hidden_text",
+        "mlp_hidden_decoder",
+        default=4 * d_text,
+    )
+
+    vocab_size = get_config("vocab_size")
+    max_text_len = get_config("max_text_len", "max_seq_len")
+
+    # These operations happen before requires_grad=True, so the results
+    # remain leaf tensors.
+    def init_weight(*shape):
+        return (
+            torch.empty(*shape)
+            .normal_(mean=0.0, std=0.02)
+            .requires_grad_(True)
+        )
+
+    def init_bias(*shape):
+        return torch.zeros(*shape).requires_grad_(True)
+
+    def init_layernorm(dim):
+        return {
+            "gamma": torch.ones(dim).requires_grad_(True),
+            "beta": init_bias(dim),
+        }
+
+    def init_attention(dim):
+        return {
+            "wq": init_weight(dim, dim),
+            "bq": init_bias(dim),
+            "wk": init_weight(dim, dim),
+            "bk": init_bias(dim),
+            "wv": init_weight(dim, dim),
+            "bv": init_bias(dim),
+            "wo": init_weight(dim, dim),
+            "bo": init_bias(dim),
+        }
+
+    def init_mlp(dim, hidden_dim):
+        return {
+            # linear_projection uses x @ weight.T
+            "w1": init_weight(hidden_dim, dim),
+            "b1": init_bias(hidden_dim),
+            "w2": init_weight(dim, hidden_dim),
+            "b2": init_bias(dim),
+        }
+
+    def init_vision_block():
+        # These names match vision_encoder_block().
+        return {
+            "ln1_gamma": torch.ones(d_vision).requires_grad_(True),
+            "ln1_beta": init_bias(d_vision),
+            "attn": init_attention(d_vision),
+            "ln2_gamma": torch.ones(d_vision).requires_grad_(True),
+            "ln2_beta": init_bias(d_vision),
+            "mlp": init_mlp(d_vision, mlp_hidden_vision),
+        }
+
+    def init_decoder_block():
+        # These names match decoder_block().
+        return {
+            "num_heads": num_decoder_heads,
+            "ln1": init_layernorm(d_text),
+            "attn": init_attention(d_text),
+            "ln2": init_layernorm(d_text),
+            "mlp": init_mlp(d_text, mlp_hidden_text),
+        }
+
+    params = {
+        "vision": {
+            "patch_size": patch_size,
+
+            # A flattened patch has C * P * P values.
+            # linear_projection performs x @ weight.T.
+            "patch_proj_weight": init_weight(
+                d_vision,
+                in_channels * patch_size * patch_size,
+            ),
+            "patch_proj_bias": init_bias(d_vision),
+
+            "class_token": init_weight(1, 1, d_vision),
+            "position_embeddings": init_weight(
+                1,
+                num_patches + 1,
+                d_vision,
+            ),
+
+            "blocks": [
+                init_vision_block()
+                for _ in range(num_vision_layers)
+            ],
+
+            "final_ln_gamma": (
+                torch.ones(d_vision).requires_grad_(True)
+            ),
+            "final_ln_beta": init_bias(d_vision),
+            "num_heads": num_vision_heads,
+        },
+
+        # Your projector functions use x @ w rather than x @ w.T,
+        # so these matrices use (input_dim, output_dim).
+        "projector": {
+            "w1": init_weight(d_vision, d_text),
+            "b1": init_bias(d_text),
+            "w2": init_weight(d_text, d_text),
+            "b2": init_bias(d_text),
+        },
+
+        "embedding": init_weight(vocab_size, d_text),
+        "pos_embedding": init_weight(max_text_len, d_text),
+
+        "decoder_blocks": [
+            init_decoder_block()
+            for _ in range(num_decoder_layers)
+        ],
+
+        "final_ln": init_layernorm(d_text),
+
+        # language_model_head performs x @ w_out + b_out.
+        "lm_head": {
+            "w_out": init_weight(d_text, vocab_size),
+            "b_out": init_bias(vocab_size),
+        },
+
+        # build_token_vocabulary assigns <image> the ID 1.
+        "image_token_id": get_config(
+            "image_token_id",
+            default=1,
+        ),
+        "num_image_tokens": get_config(
+            "num_image_tokens",
+            default=num_patches,
+        ),
+    }
+
+    return params
 
 # Step 58 - collect_parameters (not yet solved)
 # TODO: implement
