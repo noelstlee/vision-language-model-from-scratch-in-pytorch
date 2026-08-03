@@ -759,8 +759,17 @@ def sample_from_logits(logits):
     # TODO: turn logits into a categorical distribution and draw one token id
     return torch.multinomial(torch.softmax(logits, dim=-1), num_samples=1).item()
 
-# Step 56 - generate_caption (not yet solved)
-# TODO: implement
+# Step 56 - generate_caption
+def generate_caption(image, prompt_ids, params, max_new_tokens, temperature=1.0, top_k=0, do_sample=False):
+    # TODO: autoregressively generate token ids by repeatedly calling vision_language_forward.
+    for _ in range(max_new_tokens):
+        logits = vision_language_forward(image, prompt_ids, params)
+        if do_sample:
+            token_id = sample_from_logits(top_k_filter(apply_temperature(logits[-1,:], temperature), top_k))
+        else:
+            token_id = greedy_next_token(logits)
+        prompt_ids = torch.cat((prompt_ids, torch.tensor([token_id])))
+    return prompt_ids.tolist()
 
 # Step 57 - initialize_vlm_parameters (not yet solved)
 # TODO: implement
