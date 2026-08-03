@@ -814,15 +814,17 @@ def initialize_vlm_parameters(config, seed=0):
     )
 
     num_vision_heads = get_config(
-    "num_vision_heads",
-    "num_heads",
-    "n_heads",
+        "num_vision_heads",
+        "num_heads",
+        "n_heads",
+        default=1,
     )
 
     num_decoder_heads = get_config(
         "num_decoder_heads",
         "num_heads",
         "n_heads",
+        default=1,
     )
 
     mlp_hidden_vision = get_config(
