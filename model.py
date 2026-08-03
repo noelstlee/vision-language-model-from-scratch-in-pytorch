@@ -609,8 +609,7 @@ def encode_image_to_tokens(image, vision_params, projector_params):
     # split -> flatten -> project -> prepend class token -> add positions
     # -> vision encoder -> drop class token -> projector, and squeeze the batch dim.
     if image.ndim == 3:
-        # add Batch dimension
-        image.unsqueeze(0) # (B,C,H,W)
+        image = image.unsqueeze(0)
     
     # split
     split_image = split_image_into_patches(image, vision_params["patch_size"]) # (B, num_patches, C, patch_size, patch_size)
@@ -996,8 +995,43 @@ def zero_gradients(parameter_list):
         if parameter.grad is not None:
             parameter.grad.zero_()
 
-# Step 60 - training_step (not yet solved)
-# TODO: implement
+# Step 60 - training_step
+def training_step(image, token_ids, labels, params, parameter_list, learning_rate):
+    """Run one optimization step: zero grads, forward, loss, backward, SGD update. Return the scalar loss."""
+    # TODO: zero grads, compute loss via the upstream helpers, backprop, then update each parameter in place
+    # 1. Clear gradients left over from the previous step.
+    zero_gradients(parameter_list)
+
+    # 2. Forward pass.
+    logits = vision_language_forward(image, token_ids, params)
+
+    # 3. Calculate next-token prediction loss.
+    shifted_logits, shifted_labels = shift_logits_and_labels(
+        logits,
+        labels,
+    )
+
+    position_losses = per_position_cross_entropy(
+        shifted_logits,
+        shifted_labels,
+    )
+
+    loss = masked_mean_loss(
+        position_losses,
+        shifted_labels,
+    )
+
+    # 4. Populate each parameter's .grad attribute.
+    loss.backward()
+
+    # 5. Apply an in-place SGD update without creating an autograd graph.
+    with torch.no_grad():
+        for parameter in parameter_list:
+            if parameter.grad is not None:
+                parameter -= learning_rate * parameter.grad
+
+    # Return a tensor disconnected from the computation graph.
+    return loss.detach()
 
 # Step 61 - apply_gradient_update (not yet solved)
 # TODO: implement
