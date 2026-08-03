@@ -1033,8 +1033,14 @@ def training_step(image, token_ids, labels, params, parameter_list, learning_rat
     # Return a tensor disconnected from the computation graph.
     return loss.detach()
 
-# Step 61 - apply_gradient_update (not yet solved)
-# TODO: implement
+# Step 61 - apply_gradient_update
+def apply_gradient_update(parameters, learning_rate):
+    # TODO: apply p.data -= learning_rate * p.grad in-place for each parameter with a populated grad.
+    for parameter in parameters:
+        if parameter.grad is not None:
+            parameter.data -= learning_rate * parameter.grad
+
+    return parameters
 
 # Step 62 - run_training_loop (not yet solved)
 # TODO: implement
