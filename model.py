@@ -838,11 +838,8 @@ def initialize_vlm_parameters(config, seed=0):
     # These operations happen before requires_grad=True, so the results
     # remain leaf tensors.
     def init_weight(*shape):
-        return (
-            torch.empty(*shape)
-            .normal_(mean=0.0, std=0.02)
-            .requires_grad_(True)
-        )
+        return torch.empty(*shape).normal_(mean=0.0, std=0.02).requires_grad_(True)
+        
 
     def init_bias(*shape):
         return torch.zeros(*shape).requires_grad_(True)
