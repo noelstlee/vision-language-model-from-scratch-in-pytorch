@@ -745,8 +745,19 @@ def top_k_filter(logits, k):
         masked_logits.scatter_(dim=-1, index=indices, src=values)
         return masked_logits
 
-# Step 55 - sample_from_logits (not yet solved)
-# TODO: implement
+# Step 55 - sample_from_logits
+import torch
+
+def sample_from_logits(logits):
+    """Sample a token id from softmax(logits).
+
+    Args:
+        logits: 1D tensor of shape (V,)
+    Returns:
+        int token id
+    """
+    # TODO: turn logits into a categorical distribution and draw one token id
+    return torch.multinomial(torch.softmax(logits, dim=-1), num_samples=1).item()
 
 # Step 56 - generate_caption (not yet solved)
 # TODO: implement
