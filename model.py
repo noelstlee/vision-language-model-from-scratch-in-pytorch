@@ -814,11 +814,14 @@ def initialize_vlm_parameters(config, seed=0):
     )
 
     num_vision_heads = get_config(
-        "num_vision_heads",
-        "n_heads",
+    "num_vision_heads",
+    "num_heads",
+    "n_heads",
     )
+
     num_decoder_heads = get_config(
         "num_decoder_heads",
+        "num_heads",
         "n_heads",
     )
 
@@ -961,8 +964,28 @@ def initialize_vlm_parameters(config, seed=0):
 
     return params
 
-# Step 58 - collect_parameters (not yet solved)
-# TODO: implement
+# Step 58 - collect_parameters
+def collect_parameters(params):
+    """Return every trainable leaf tensor from a nested parameter container."""
+    collected = []
+
+    def walk(value):
+        if torch.is_tensor(value):
+            if value.is_leaf and value.requires_grad:
+                collected.append(value)
+
+        elif isinstance(value, dict):
+            for nested_value in value.values():
+                walk(nested_value)
+
+        elif isinstance(value, (list, tuple)):
+            for nested_value in value:
+                walk(nested_value)
+
+        # Non-tensor values such as integers are intentionally ignored.
+
+    walk(params)
+    return collected
 
 # Step 59 - zero_gradients (not yet solved)
 # TODO: implement
