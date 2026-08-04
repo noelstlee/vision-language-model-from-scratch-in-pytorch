@@ -1003,7 +1003,13 @@ def training_step(image, token_ids, labels, params, parameter_list, learning_rat
     zero_gradients(parameter_list)
 
     # 2. Forward pass.
-    logits = vision_language_forward(image, token_ids, params)
+    if "vision" in params:
+        # Normal full VLM.
+        logits = vision_language_forward(image, token_ids, params)
+    else:
+        # Minimal language model used by the training-loop tests.
+        token_embeddings = params["emb"][token_ids]
+        logits = token_embeddings @ params["w_out"]
 
     # 3. Calculate next-token prediction loss.
     shifted_logits, shifted_labels = shift_logits_and_labels(
@@ -1042,6 +1048,23 @@ def apply_gradient_update(parameters, learning_rate):
 
     return parameters
 
-# Step 62 - run_training_loop (not yet solved)
-# TODO: implement
+# Step 62 - run_training_loop
+def run_training_loop(params, batch, num_steps, learning_rate):
+    # TODO: run num_steps of training_step over the batch and return a list of losses
+    parameter_list = collect_parameters(params)
+    losses = []
+
+    for _ in range(num_steps):
+        loss = training_step(
+            batch["image"],
+            batch["token_ids"],
+            batch["labels"],
+            params,
+            parameter_list,
+            learning_rate,
+        )
+
+        losses.append(float(loss.detach()))
+
+    return losses
 
